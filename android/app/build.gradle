@@ -73,55 +73,124 @@ def enableProguardInReleaseBuilds = false
  */
 def jscFlavor = 'org.webkit:android-jsc:+'
 
-android {
-    ndkVersion = "27.1.12297006"
-    buildToolsVersion = "35.0.0"
-    compileSdk = 35
+Android {
 
-    namespace = "com.appcirclernapp"
+    ndkVersion = "27.1.12297006"
+
+    buildToolsVersion = "35.0.0"
+
+    compileSdk = 35
+ 
+    // <-- 1. DEĞİŞİKLİK: Namespace benzersiz bir isimle değiştirildi
+
+    namespace = "com.seninsirketin.essizprojeadi"
+ 
     defaultConfig {
-        applicationId = "com.appcirclernapp"
+
+        // <-- 2. DEĞİŞİKLİK: Application ID Google Play'de çakışmaması için güncellendi
+
+        applicationId = "com.seninsirketin.essizprojeadi" 
+
         minSdk = 24
+
         targetSdk = 35
+
         versionCode = 1
+
         versionName = "1.0"
+
         // Ensure native libraries are included
+
         ndk {
+
             abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
+
         }
+
     }
+
     signingConfigs {
+
         debug {
+
             storeFile = file('debug.keystore')
+
             storePassword = 'android'
+
             keyAlias = 'androiddebugkey'
+
             keyPassword = 'android'
+
         }
-    }
-    packaging {
-        jniLibs {
-            useLegacyPackaging = false
-        }
-        resources {
-            excludes += ['META-INF/DEPENDENCIES', 'META-INF/LICENSE', 'META-INF/LICENSE.txt', 'META-INF/license.txt', 'META-INF/NOTICE', 'META-INF/NOTICE.txt', 'META-INF/notice.txt', 'META-INF/ASL2.0']
-        }
-    }
-    
-    buildTypes {
-        debug {
-            signingConfig = signingConfigs.debug
-            debuggable = true
-            minifyEnabled = false
-        }
+
+        // <-- 3. YENİ EKLENDİ: Gerçek üretim (production) imza ayarları
+
+        // Bu değişkenleri (MYAPP_...) CI/CD pipeline'ında ortam değişkeni (environment variable) 
+
+        // olarak veya yerel makinedeki gradle.properties dosyasından besleyebilirsin.
+
         release {
-            // Caution! In production, you need to generate your own keystore file.
-            // see https://reactnative.dev/docs/signed-apk-android.
-            signingConfig = signingConfigs.debug
-            minifyEnabled = enableProguardInReleaseBuilds
-            proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro")
+
+            if (project.hasProperty('MYAPP_UPLOAD_STORE_FILE')) {
+
+                storeFile file(MYAPP_UPLOAD_STORE_FILE)
+
+                storePassword MYAPP_UPLOAD_STORE_PASSWORD
+
+                keyAlias MYAPP_UPLOAD_KEY_ALIAS
+
+                keyPassword MYAPP_UPLOAD_KEY_PASSWORD
+
+            }
+
         }
+
     }
+
+    packaging {
+
+        jniLibs {
+
+            useLegacyPackaging = false
+
+        }
+
+        resources {
+
+            excludes += ['META-INF/DEPENDENCIES', 'META-INF/LICENSE', 'META-INF/LICENSE.txt', 'META-INF/license.txt', 'META-INF/NOTICE', 'META-INF/NOTICE.txt', 'META-INF/notice.txt', 'META-INF/ASL2.0']
+
+        }
+
+    }
+
+    buildTypes {
+
+        debug {
+
+            signingConfig = signingConfigs.debug
+
+            debuggable = true
+
+            minifyEnabled = false
+
+        }
+
+        release {
+
+            // <-- 4. DEĞİŞİKLİK: Artık debug değil, yukarıda tanımladığımız release konfigürasyonu kullanılıyor
+
+            signingConfig = signingConfigs.release
+
+            minifyEnabled = enableProguardInReleaseBuilds
+
+            proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro")
+
+        }
+
+    }
+
 }
+ 
 
 dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
